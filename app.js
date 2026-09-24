@@ -15,6 +15,7 @@ const loginForm = $('#loginForm');
 const retiroForm = $('#retiroForm');
 const pagoForm = $('#pagoForm');
 const userForm = $('#userForm');
+const itemsList = $('#itemsList');
 
 const formatMoney = (value) => `Gs. ${Math.round(value || 0).toLocaleString('es-PY')}`;
 const normalizeProvider = (value) => value.trim().replace(/\s+/g, ' ');
@@ -39,7 +40,7 @@ function formValues(form) {
 
 function ensureDefaultUser() {
   if (!Array.isArray(state.users)) state.users = [];
-  if (state.users.length) return;
+  if (findUser(DEFAULT_USER)) return;
   state.users.push(createUser(DEFAULT_USER, DEFAULT_PASSWORD));
   saveState();
 }
@@ -141,6 +142,52 @@ function setTodayDefaults() {
   if (!$('#mesAnio').value) $('#mesAnio').value = today.slice(0, 7);
 }
 
+function createItemRow() {
+  const row = document.createElement('div');
+  row.className = 'item-row';
+  row.innerHTML = `
+    <label>Item / concepto
+      <input name="concepto" type="text" required placeholder="Descripcion del item">
+    </label>
+    <label>Cantidad
+      <input name="cantidad" type="number" min="0" step="0.01" required>
+    </label>
+    <label>Precio unitario
+      <input name="precio" type="number" min="0" step="1" required>
+    </label>
+    <label>Total
+      <input name="totalItem" type="text" value="Gs. 0" readonly>
+    </label>
+    <button type="button" class="row-action" data-remove-item>Quitar</button>
+  `;
+  itemsList.appendChild(row);
+  updateItemTotal(row);
+  updatePurchaseTotal();
+}
+
+function ensureItemRow() {
+  if (!itemsList.children.length) createItemRow();
+}
+
+function updateItemTotal(row) {
+  const cantidad = Number(row.querySelector('[name="cantidad"]').value);
+  const precio = Number(row.querySelector('[name="precio"]').value);
+  row.querySelector('[name="totalItem"]').value = formatMoney(cantidad * precio);
+}
+
+function updatePurchaseTotal() {
+  const total = itemRows().reduce((sum, row) => {
+    const cantidad = Number(row.querySelector('[name="cantidad"]').value);
+    const precio = Number(row.querySelector('[name="precio"]').value);
+    return sum + cantidad * precio;
+  }, 0);
+  $('#purchaseTotal').textContent = `Total compra: ${formatMoney(total)}`;
+}
+
+function itemRows() {
+  return [...itemsList.querySelectorAll('.item-row')];
+}
+
 function bindSettings() {
   ['responsableGeneral', 'lugar', 'mesAnio', 'fechaInicio'].forEach((id) => {
     const input = $(`#${id}`);
@@ -155,26 +202,41 @@ function bindSettings() {
 retiroForm.addEventListener('submit', (event) => {
   event.preventDefault();
   const data = formValues(retiroForm);
-  const retiro = {
-    id: crypto.randomUUID(),
-    proveedor: normalizeProvider(data.proveedor),
-    telefono: data.telefono.trim(),
-    fecha: data.fecha,
-    semana: Number(data.semana),
-    concepto: data.concepto.trim(),
-    cantidad: Number(data.cantidad),
-    unidad: data.unidad.trim(),
-    precio: Number(data.precio),
-    destino: data.destino.trim(),
-    responsable: data.responsable.trim(),
-    comprobante: data.comprobante.trim()
-  };
-  retiro.total = retiro.cantidad * retiro.precio;
-  state.retiros.push(retiro);
+  itemRows().forEach((row) => {
+    const concepto = row.querySelector('[name="concepto"]').value.trim();
+    const cantidad = Number(row.querySelector('[name="cantidad"]').value);
+    const precio = Number(row.querySelector('[name="precio"]').value);
+    const retiro = {
+      id: crypto.randomUUID(),
+      proveedor: normalizeProvider(data.proveedor),
+      telefono: data.telefono.trim(),
+      fecha: data.fecha,
+      semana: Number(data.semana),
+      concepto,
+      cantidad,
+      precio,
+      destino: data.destino.trim(),
+      responsable: data.responsable.trim(),
+      comprobante: data.comprobante.trim()
+    };
+    retiro.total = retiro.cantidad * retiro.precio;
+    state.retiros.push(retiro);
+  });
   saveState();
   retiroForm.reset();
+  itemsList.innerHTML = '';
+  ensureItemRow();
   setTodayDefaults();
   render();
+});
+
+$('#addItem').addEventListener('click', createItemRow);
+
+itemsList.addEventListener('input', (event) => {
+  const row = event.target.closest('.item-row');
+  if (!row) return;
+  updateItemTotal(row);
+  updatePurchaseTotal();
 });
 
 pagoForm.addEventListener('submit', (event) => {
@@ -206,15 +268,15 @@ $('#clearData').addEventListener('click', () => {
 
 $('#exportCsv').addEventListener('click', () => {
   const rows = [
-    ['tipo', 'fecha', 'semana', 'proveedor', 'concepto_observacion', 'cantidad', 'unidad', 'precio_unitario', 'monto_total', 'destino_forma', 'responsable_comprobante']
+    ['tipo', 'fecha', 'semana', 'proveedor', 'concepto_observacion', 'cantidad', 'precio_unitario', 'monto_total', 'destino_forma', 'responsable_comprobante']
   ];
 
   state.retiros.forEach((item) => rows.push([
-    'retiro', item.fecha, item.semana, item.proveedor, item.concepto, item.cantidad, item.unidad, item.precio, item.total, item.destino, item.responsable || item.comprobante
+    'retiro', item.fecha, item.semana, item.proveedor, item.concepto, item.cantidad, item.precio, item.total, item.destino, item.responsable || item.comprobante
   ]));
 
   state.pagos.forEach((item) => rows.push([
-    'pago', item.fecha, '', item.proveedor, item.observacion, '', '', '', item.monto, item.forma, item.comprobante
+    'pago', item.fecha, '', item.proveedor, item.observacion, '', '', item.monto, item.forma, item.comprobante
   ]));
 
   const csv = rows.map((row) => row.map(csvCell).join(';')).join('\n');
@@ -338,13 +400,12 @@ function renderSemanal() {
 }
 
 function renderRetiros() {
-  renderRows('#retirosBody', [...state.retiros].sort(byDate), 10, (item) => `
+  renderRows('#retirosBody', [...state.retiros].sort(byDate), 9, (item) => `
     <tr>
       <td>${item.fecha}</td>
       <td>${escapeHtml(item.proveedor)}</td>
       <td>${escapeHtml(item.concepto)}</td>
       <td>${item.cantidad}</td>
-      <td>${escapeHtml(item.unidad)}</td>
       <td class="money">${formatMoney(item.precio)}</td>
       <td class="money">${formatMoney(item.total)}</td>
       <td>${escapeHtml(item.destino)}</td>
@@ -376,8 +437,15 @@ document.addEventListener('click', (event) => {
   const retiroId = event.target.dataset.deleteRetiro;
   const pagoId = event.target.dataset.deletePago;
   const userId = event.target.dataset.deleteUser;
+  const removeItem = event.target.dataset.removeItem !== undefined;
   if (retiroId) state.retiros = state.retiros.filter((item) => item.id !== retiroId);
   if (pagoId) state.pagos = state.pagos.filter((item) => item.id !== pagoId);
+  if (removeItem) {
+    event.target.closest('.item-row').remove();
+    ensureItemRow();
+    updatePurchaseTotal();
+    return;
+  }
   if (userId) {
     if (currentUser()?.username !== DEFAULT_USER) return;
     if (state.users.length === 1) {
@@ -402,6 +470,7 @@ function escapeHtml(value) {
 }
 
 ensureDefaultUser();
+ensureItemRow();
 bindSettings();
 setTodayDefaults();
 render();

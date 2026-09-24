@@ -4,7 +4,7 @@ Como usarlo:
 1. Abrir index.html con doble clic en el navegador.
 2. Iniciar sesion con usuario admin y clave admin123.
 3. Completar los datos generales si corresponde.
-4. Cargar cada retiro con proveedor, fecha, semana, concepto, cantidad y precio unitario.
+4. Cargar cada compra con proveedor, fecha, semana y uno o varios productos/servicios con cantidad y precio unitario.
 5. Cargar pagos o abonos cuando se realicen.
 6. Revisar automaticamente el resumen por proveedor, control semanal y total pendiente.
 7. El usuario admin puede entrar a la vista Usuarios para crear nuevos accesos.

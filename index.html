@@ -43,7 +43,7 @@
   </header>
 
   <main id="controlView" class="layout">
-    <section class="panel controls">
+    <section class="panel controls wide">
       <h2>Datos generales</h2>
       <div class="grid two">
         <label>Responsable
@@ -61,14 +61,14 @@
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel purchase-panel wide">
       <div class="section-title">
         <div>
           <h2>Registrar retiro</h2>
           <p>Cada retiro queda asignado a un proveedor y semana.</p>
         </div>
       </div>
-      <form id="retiroForm" class="form-grid">
+      <form id="retiroForm" class="form-grid purchase-form">
         <label>Proveedor
           <input name="proveedor" type="text" required placeholder="Ej: Ferreteria San Miguel">
         </label>
@@ -81,18 +81,6 @@
         <label>Semana Nro.
           <input name="semana" type="number" min="1" max="53" required>
         </label>
-        <label>Producto / concepto
-          <input name="concepto" type="text" required placeholder="Descripcion del retiro">
-        </label>
-        <label>Cantidad
-          <input name="cantidad" type="number" min="0" step="0.01" required>
-        </label>
-        <label>Unidad
-          <input name="unidad" type="text" placeholder="un, kg, m, caja...">
-        </label>
-        <label>Precio unitario
-          <input name="precio" type="number" min="0" step="1" required>
-        </label>
         <label>Destino / actividad
           <input name="destino" type="text" placeholder="Donde se uso">
         </label>
@@ -102,6 +90,17 @@
         <label>Firma / comprobante
           <input name="comprobante" type="text" placeholder="Nro. recibo, firma, remision">
         </label>
+        <div class="items-editor">
+          <div class="items-title">
+            <div>
+              <h3>Productos / servicios</h3>
+              <p>Carga uno o varios items de la misma compra.</p>
+            </div>
+            <strong id="purchaseTotal" class="purchase-total">Total compra: Gs. 0</strong>
+            <button id="addItem" type="button">Agregar item</button>
+          </div>
+          <div id="itemsList" class="items-list"></div>
+        </div>
         <button type="submit" class="primary">Guardar retiro</button>
       </form>
     </section>
@@ -192,7 +191,6 @@
               <th>Proveedor</th>
               <th>Concepto</th>
               <th>Cantidad</th>
-              <th>Unidad</th>
               <th>Precio unit.</th>
               <th>Total</th>
               <th>Destino</th>
@@ -265,7 +263,7 @@
   </main>
 
   <template id="emptyRowTemplate">
-    <tr><td colspan="10" class="empty">Todavia no hay datos cargados.</td></tr>
+    <tr><td colspan="9" class="empty">Todavia no hay datos cargados.</td></tr>
   </template>
 
   </div>

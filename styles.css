@@ -131,6 +131,15 @@ h2 { margin-bottom: 12px; }
 
 .wide { grid-column: 1 / -1; }
 
+.controls {
+  background: linear-gradient(135deg, #ffffff 0%, #fff7f7 100%);
+}
+
+.purchase-panel {
+  border-color: #efb6b6;
+  background: linear-gradient(180deg, #ffffff 0%, #fffafa 100%);
+}
+
 .section-title {
   display: flex;
   align-items: flex-start;
@@ -154,8 +163,67 @@ h2 { margin-bottom: 12px; }
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.purchase-form {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: end;
+}
+
 .compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .user-form { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.purchase-form .items-editor { grid-column: 1 / -1; }
+.purchase-form .primary {
+  grid-column: 1 / -1;
+  justify-self: end;
+  min-width: 220px;
+}
+
+.items-editor {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #efb6b6;
+  border-radius: 20px;
+  background: #fff6f6;
+}
+
+.items-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.items-title h3 { margin: 0 0 4px; }
+.items-title p { margin: 0; color: var(--muted); }
+.purchase-total {
+  padding: 10px 14px;
+  border-radius: 999px;
+  color: var(--primary-dark);
+  background: #ffe8e8;
+  white-space: nowrap;
+}
+
+.items-list {
+  display: grid;
+  gap: 10px;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.7fr) minmax(110px, .7fr) minmax(130px, .8fr) minmax(130px, .8fr) auto;
+  gap: 12px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid #f3cccc;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.item-row input[readonly] {
+  color: var(--primary-dark);
+  font-weight: 800;
+  background: #fff0f0;
+}
 
 label {
   display: grid;
@@ -172,6 +240,7 @@ input {
   border-radius: 12px;
   color: var(--ink);
   font: inherit;
+  font-size: 16px;
   font-weight: 500;
   background: #fbfdff;
 }
@@ -215,6 +284,7 @@ button:hover { filter: brightness(.96); }
 .table-wrap {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--line);
   border-radius: 16px;
 }
@@ -256,9 +326,118 @@ tbody tr:last-child td { border-bottom: 0; }
   .hero, .layout { padding-left: 18px; padding-right: 18px; }
   .hero { flex-direction: column; }
   .layout { grid-template-columns: 1fr; }
-  .form-grid, .compact, .two, .user-form { grid-template-columns: 1fr; }
+  .form-grid, .compact, .two, .user-form, .purchase-form { grid-template-columns: 1fr; }
+  .item-row { grid-template-columns: 1fr; }
+  .purchase-form .primary { justify-self: stretch; min-width: 0; }
+  .items-title { display: grid; }
+  .purchase-total { justify-self: start; }
   .actions-title { display: block; }
   .actions { justify-content: flex-start; margin-top: 16px; }
+}
+
+@media (max-width: 640px) {
+  body {
+    background: #fff7f7;
+  }
+
+  .login-screen {
+    padding: 14px;
+  }
+
+  .login-card {
+    padding: 22px;
+    border-radius: 20px;
+  }
+
+  .hero {
+    gap: 18px;
+    padding-top: 26px;
+    padding-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-size: 34px;
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .hero-card {
+    width: 100%;
+    min-width: 0;
+    padding: 18px;
+  }
+
+  .hero-card strong {
+    font-size: 26px;
+  }
+
+  .admin-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .layout {
+    gap: 16px;
+    padding: 16px 12px 34px;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .section-title {
+    display: block;
+  }
+
+  .section-title p {
+    font-size: 14px;
+  }
+
+  .items-editor {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .items-title button,
+  .item-row button,
+  .actions button,
+  .logout,
+  .admin-nav button,
+  .primary {
+    width: 100%;
+  }
+
+  .purchase-total {
+    width: 100%;
+    text-align: center;
+  }
+
+  .item-row {
+    padding: 12px;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .table-wrap {
+    margin-left: -4px;
+    margin-right: -4px;
+    border-radius: 12px;
+  }
+
+  table {
+    min-width: 720px;
+  }
+
+  th, td {
+    padding: 10px 9px;
+    font-size: 13px;
+  }
 }
 
 @media print {
